@@ -22,26 +22,29 @@ def find_peaks(y):
     return 1 + np.nonzero(i)[0] # indices of local max
 
 
-def interp_roots(x, y):
+def interp_roots(xy):
     """Interpolate to estimate all x where y=0
 
     >>> x = np.array(range(20))
 
     These roots are exactly at provided points:
-    >>> interp_roots(x, (x - 10.)*(x - 12))
+    >>> interp_roots(np.transpose( [x, (x - 10.)*(x - 12)] ))
     array([ 10.,  12.])
 
     Some loss of accuracy between points of nonlinear function:
     >>> np.set_printoptions(precision=3)
-    >>> interp_roots(x, (x - 8.5)*(x - 18.2))
+    >>> interp_roots(np.transpose( [x, (x - 8.5)*(x - 18.2)] ))
     array([  8.526,  18.184])
     """
 
-    x, y = np.asarray(x), np.asarray(y)
-    i = np.nonzero(y[1:]*y[:-1] <= 0)[0] # indices where y crosses zero
+    xy = np.asarray(xy)
+    i = (( xy[1:]*xy[:-1] )[:,1] <= 0).nonzero()[0] # indices where y crosses zero
     roots = []
-    for x0, x1, y0, y1 in zip(x[i], x[i + 1], y[i], y[i + 1]):
-        roots.append( x0 - y0/(y1 - y0)*(x1 - x0) ) # linear interpolation
+    for (x0, y0), (x1, y1) in zip(xy[i], xy[i + 1]):
+        if y0 == y1:
+            roots.append( x0 )
+        else:
+            roots.append( x0 - y0/(y1 - y0)*(x1 - x0) ) # linear interpolation
     return np.unique(roots)
 
 
@@ -59,20 +62,15 @@ def find_damping(xy):
 
     damping = []
     xy = np.asarray(xy)
-    x = xy[:,0]
     peaks = find_peaks(xy[:,1])
     if not len(peaks):
         return peaks # no peaks were found; return empty array
     augmentedPeaks = [0] + list(peaks) + [None]
-    for i, j, k in zip(
-            augmentedPeaks[:-2],
-            augmentedPeaks[1:-1],
-            augmentedPeaks[2:],
-            ):
+    for i, j, k in zip(augmentedPeaks[:-2], augmentedPeaks[1:-1], augmentedPeaks[2:]):
         fn, amp = xy[j] # frequency and amplitude of peak
-        y = xy[:,1] - amp/np.sqrt(2) # half power, approx -3 dB
-        left = interp_roots(x[i:j + 1], y[i:j + 1]) # roots left of peak
-        right = interp_roots(x[j:k], y[j:k]) # roots right of peak
+        halfPowerXY = xy - [0, amp/np.sqrt(2)] # this peak half power, approx -3 dB
+        left = interp_roots(halfPowerXY[i:j + 1]) # roots left of peak
+        right = interp_roots(halfPowerXY[j:k]) # roots right of peak
         if len(left) and len(right):
             Q = fn/(right[0] - left[-1])
             damping.append([fn, 1/(2*Q)])
