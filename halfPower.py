@@ -6,7 +6,6 @@ Run doctest with command:
 Carl Osterwisch, August 2021
 """
 
-from __future__ import print_function
 import numpy as np
 from abaqusConstants import NONE, FREQUENCY
 
