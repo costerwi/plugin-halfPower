@@ -1,10 +1,11 @@
-"""Estimate the critical damping ratio using the half power bandwidth method.
+"""Critical damping ratio calculation using half power (-3dB) bandwidth method
 
 Begin by plotting a frequency response magnitude function in the current viewport.
-This plug-in will attempt to identify local peaks based on slope and estimate
-half power bandwidth using linear interpolation between available data ponts.
+This plug-in will identify local peaks and estimate their damping using each peak's
+frequency divided by its half power bandwidth. The half power bandwidth itself is
+calculated using logarithmic interpolation between available data points.
 
-The results are reported in XY Data and also added to the current plot.
+The damping results are reported in XY Data and also added to the current plot.
 """
 
 __VERSION__ = 0.1
