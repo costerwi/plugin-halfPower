@@ -11,7 +11,6 @@ The damping results are reported in XY Data and also added to the current plot.
 __VERSION__ = 0.1
 
 from abaqusGui import getAFXApp
-#from abaqusConstants import *
 
 toolset = getAFXApp().getAFXMainWindow().getPluginToolset()
 
