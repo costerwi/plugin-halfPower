@@ -31,7 +31,7 @@ def interp_roots(x, y):
     >>> interp_roots(x, (x - 10.)*(x - 12))
     array([ 10.,  12.])
 
-    Linear interpolation does not give exact results for nonlinear function:
+    Some loss of accuracy between points of nonlinear function:
     >>> np.set_printoptions(precision=3)
     >>> interp_roots(x, (x - 8.5)*(x - 18.2))
     array([  8.526,  18.184])
@@ -47,14 +47,16 @@ def interp_roots(x, y):
 
 def find_damping(xy):
     """Estimate critical damping using half power method
-    
+
+    Returns frequency in first column, critical damping in second.
+
     >>> x = range(720)
     >>> y = np.sin(np.deg2rad(x))
     >>> np.array(find_damping(np.array([x, y]).T))
     array([[  9.00000000e+01,   5.00000000e-01],
            [  4.50000000e+02,   1.00000000e-01]])
     """
-    
+
     damping = []
     xy = np.asarray(xy)
     x = xy[:,0]
@@ -66,11 +68,11 @@ def find_damping(xy):
         if len(left) and len(right):
             Q = fn/(right[0] - left[-1])
             damping.append([fn, 1/(2*Q)])
-    return np.array(damping)
+    return np.array(damping) # frequency, critical damping ratio
 
 
 def plotDamping():
-    """Called by Abaqus CAE to estimate critical damping in xyPlot
+    """Called by Abaqus CAE to estimate critical damping in current xyPlot
     """
 
     from abaqus import session, getWarningReply, CANCEL
