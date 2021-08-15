@@ -94,7 +94,6 @@ def plotDamping():
                 (CANCEL, )
                 )
     chart = xyPlot.charts.values()[0]
-    newCurves = []
     for curve in chart.curves.values():
         if FREQUENCY != curve.data.axis1QuantityType.type:
             continue # not vs frequency
@@ -121,13 +120,9 @@ def plotDamping():
                 yValuesLabel = 'Critical Damping',
                 )
             )
-        curve.symbolStyle.setValues(
-                show=True,
-                size=2,
-                )
+        curve.symbolStyle.setValues(show=True, size=2)
         curve.lineStyle.setValues(show=False)
-        newCurves.append(curve)
-    chart.setValues(curvesToPlot=chart.curves.values() + newCurves)
+        chart.setValues(curvesToPlot=chart.curves.values() + [curve])
 
 if __name__ == '__main__':
     import doctest
