@@ -60,11 +60,19 @@ def find_damping(xy):
     damping = []
     xy = np.asarray(xy)
     x = xy[:,0]
-    for j in find_peaks(xy[:,1]):
+    peaks = find_peaks(xy[:,1])
+    if not len(peaks):
+        return peaks # no peaks were found; return empty array
+    augmentedPeaks = [0] + list(peaks) + [None]
+    for i, j, k in zip(
+            augmentedPeaks[:-2],
+            augmentedPeaks[1:-1],
+            augmentedPeaks[2:],
+            ):
         fn, amp = xy[j] # frequency and amplitude of peak
         y = xy[:,1] - amp/np.sqrt(2) # half power, approx -3 dB
-        left = interp_roots(x[:j + 1], y[:j + 1])
-        right = interp_roots(x[j:], y[j:])
+        left = interp_roots(x[i:j + 1], y[i:j + 1]) # roots left of peak
+        right = interp_roots(x[j:k], y[j:k]) # roots right of peak
         if len(left) and len(right):
             Q = fn/(right[0] - left[-1])
             damping.append([fn, 1/(2*Q)])
