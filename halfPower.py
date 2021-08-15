@@ -62,17 +62,20 @@ def find_damping(xy):
 
     damping = []
     xy = np.asarray(xy)
+    xy = xy[xy[:,1] > 0] # positive values only
+    xy[:,1] = np.log10(xy[:,1]) # switch to semi-log
     peaks = find_peaks(xy[:,1])
     if not len(peaks):
         return peaks # no peaks were found; return empty array
+    db3 = 0.5*np.log10(2) # log10(sqrt(2))
     augmentedPeaks = [0] + list(peaks) + [None]
     for i, j, k in zip(augmentedPeaks[:-2], augmentedPeaks[1:-1], augmentedPeaks[2:]):
-        fn, amp = xy[j] # frequency and amplitude of peak
-        halfPowerXY = xy - [0, amp/np.sqrt(2)] # this peak half power, approx -3 dB
+        fn, log10amp = xy[j] # frequency and amplitude of peak
+        halfPowerXY = xy - [0, log10amp - db3] # this peak half power, approx -3 dB
         left = interp_roots(halfPowerXY[i:j + 1]) # roots left of peak
         right = interp_roots(halfPowerXY[j:k]) # roots right of peak
         if len(left) and len(right):
-            Q = fn/(right[0] - left[-1])
+            Q = fn/(right[0] - left[-1]) # frequency/bandwidth
             damping.append([fn, 1/(2*Q)])
     return np.array(damping) # frequency, critical damping ratio
 
