@@ -104,8 +104,8 @@ def plotDamping():
         if not len(damping):
             continue # no damping found
 
-        n = 0 # find unique name
-        while not n or session.xyDataObjects.has_key(name):
+        n = 0
+        while not n or session.xyDataObjects.has_key(name): # find unique name
             n -= 1
             name = curve.data.name + ' DAMPING' + str(n)
 
