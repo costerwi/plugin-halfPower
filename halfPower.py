@@ -81,7 +81,7 @@ def plotDamping():
     """Called by Abaqus CAE to estimate critical damping in current xyPlot
     """
 
-    from abaqus import session, getWarningReply, CANCEL
+    from abaqus import session, getWarningReply, YES, YES_TO_ALL, CANCEL
     from visualization import QuantityType
     dampingType = QuantityType(type=NONE, label='Critical damping ratio')
     vp = session.viewports[session.currentViewportName]
@@ -91,13 +91,25 @@ def plotDamping():
                 'You must first display an XY Plot of frequency\nresponse in the current viewport',
                 (CANCEL, )
                 )
+    reply = None
     chart = xyPlot.charts.values()[0]
     for curve in chart.curves.values():
         if FREQUENCY != curve.data.axis1QuantityType.type:
             continue # not vs frequency
         if NONE == curve.data.axis2QuantityType.type:
             continue # not a quantity
-        data = curve.data.data
+        data = np.asarray(curve.data.data)
+        if (reply != YES_TO_ALL) and (
+                np.any(data[:,1] < 0) or
+                ('CPX:' in curve.data.description and not 'CPX:Mg' in curve.data.description)
+                ):
+            reply = getWarningReply(
+                curve.data.legendLabel + '\ndoes not appear to be complex magnitude. Continue?',
+                (YES, YES_TO_ALL, CANCEL),
+                )
+            if CANCEL == reply:
+                break
+
         damping = find_damping(data)
         if not len(damping):
             continue # no damping found
@@ -121,6 +133,7 @@ def plotDamping():
         curve.symbolStyle.setValues(show=True, size=2)
         curve.lineStyle.setValues(show=False)
         chart.setValues(curvesToPlot=chart.curves.values() + [curve])
+
 
 if __name__ == '__main__':
     import doctest
