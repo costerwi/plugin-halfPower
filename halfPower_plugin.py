@@ -22,5 +22,6 @@ toolset.registerKernelMenuButton(
         author='Carl Osterwisch',
         description=__doc__,
         version=__VERSION__,
+        helpUrl='https://github.com/costerwi/halfPower',
         applicableModules=['Visualization'],
     )
